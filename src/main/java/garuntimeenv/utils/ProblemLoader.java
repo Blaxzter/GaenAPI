@@ -3,20 +3,15 @@ package garuntimeenv.utils;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 import com.google.gson.stream.MalformedJsonException;
+import garuntimeenv.apicomponents.ProblemConstrainDefinition;
 import garuntimeenv.envcomponents.TestManager;
 import garuntimeenv.gacomponents.ProblemProperties;
-import garuntimeenv.gacomponents.jobshop.JobShopProblem;
 import garuntimeenv.interfaces.IProblem;
 import garuntimeenv.runtimeexceptions.DataTypeNotSupportedException;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.lang.reflect.Field;
-import java.net.URL;
 import java.util.Random;
 
 /**
@@ -40,23 +35,13 @@ public class ProblemLoader {
     }
 
     /**
-     * Loads a random problem instance
-     *
-     * @param problem The problem kind
-     * @return The problem object
-     */
-    public IProblem loadProblem(problems problem) throws FileNotFoundException, MalformedJsonException, DataTypeNotSupportedException {
-        return loadProblem(problem.toString(), rand.nextInt(200));
-    }
-
-    /**
      * Loads a specific problem instance
      *
      * @param problem The problem kind
      * @return The problem object
      */
-    public IProblem loadProblem(problems problem, int element) throws FileNotFoundException, MalformedJsonException, DataTypeNotSupportedException {
-        return loadProblem(problem.toString(), element);
+    public <T extends IProblem> IProblem loadProblem(T  problem, int element) throws FileNotFoundException, MalformedJsonException, DataTypeNotSupportedException {
+        return loadProblem(problem, element);
     }
 
     /**
@@ -65,31 +50,25 @@ public class ProblemLoader {
      * @param problem The problem kind
      * @return The problem object
      */
-    public IProblem loadProblem(String problem) throws FileNotFoundException, MalformedJsonException, DataTypeNotSupportedException {
+    public <T extends IProblem> IProblem loadProblem(T  problem, JsonObject problemconstraint)
+            throws FileNotFoundException, MalformedJsonException, DataTypeNotSupportedException {
         return loadProblem(problem, rand.nextInt(200));
     }
 
     /**
      * Loads the problem and returns the problem object
      *
-     * @param problemKind The problem kind
      * @param element     the index of the problem instance in the json
      * @return The problem object
      * @throws FileNotFoundException         If there is no file in which the json is stored
      * @throws MalformedJsonException        If the json is malformed
      * @throws DataTypeNotSupportedException If there is a non primitive type in the object json
      */
-    public IProblem loadProblem(String problemKind, int element) throws FileNotFoundException, MalformedJsonException, DataTypeNotSupportedException {
+    public <T extends IProblem> IProblem loadProblem(T  problem, ProblemConstrainDefinition constrainDefinition, int element) throws FileNotFoundException, MalformedJsonException, DataTypeNotSupportedException {
+
         JsonArray problemArray = readFile(problemKind + "_Problem.json");
         int problemAmount = problemArray.size();
         JsonObject jsonData = problemArray.get(element % problemAmount).getAsJsonObject();
-
-        IProblem problem = null;
-        switch (problemKind) {
-            case "Job_Shop_Scheduling":
-                problem = new JobShopProblem();
-                break;
-        }
 
         putDataInObject(jsonData, problem);
 
@@ -152,38 +131,6 @@ public class ProblemLoader {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-    }
-
-    /**
-     * Takes a filepath to a problem and returns the json array
-     *
-     * @param filepath The filepath of the file that contains the json
-     * @return The json array containing the problem instances
-     * @throws FileNotFoundException  If the file is not found
-     * @throws MalformedJsonException If the json couldn't be parsed
-     */
-    private JsonArray readFile(String filepath) throws FileNotFoundException, MalformedJsonException {
-
-        JsonParser parser = new JsonParser();
-
-        InputStream input = ProblemLoader.class.getResourceAsStream("/problems/" + filepath);
-        if (input == null) {
-            input = ProblemLoader.class.getClassLoader().getResourceAsStream(filepath);
-        }
-
-        if(input == null) {
-            throw new FileNotFoundException("File " + filepath + " not found");
-        }
-
-        JsonElement jsonElement = parser.parse(
-                new InputStreamReader(input)
-        );
-
-        if (jsonElement.isJsonArray()) {
-            return jsonElement.getAsJsonArray();
-        }
-
-        throw new MalformedJsonException("The problem json wasn't an array.");
     }
 
     /**

@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>gentest</groupId>
-    <artifactId>gaen</artifactId>
+    <artifactId>geanapi</artifactId>
     <packaging>jar</packaging>
     <version>1.0.0</version>
     <name>Implementation of the bachelor project in genetic algorithms</name>
