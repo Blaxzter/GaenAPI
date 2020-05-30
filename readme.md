@@ -1,4 +1,4 @@
-# GeanAPI
+![GeanAPI Logo](https://github.com/Blaxzter/GaenAPI/blob/gh-pages/logo.png?raw=true)
 ## A Runtime environment for testing hyper parameter compositions of genetic algorithm 
 
 Remark: This version is a temporary version improved upon in the near future.   
